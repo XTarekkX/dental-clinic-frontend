@@ -9,6 +9,7 @@ export const loginSchema = z.object({
     .string()
     .min(1, 'Password is required')
     .max(100, 'Password is too long'),
+  rememberMe: z.boolean(),
 })
 
 export type LoginSchemaValues = z.infer<typeof loginSchema>

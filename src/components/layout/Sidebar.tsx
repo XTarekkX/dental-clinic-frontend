@@ -75,7 +75,12 @@ export function Sidebar({ mobileOpen, onCloseMobile }: SidebarProps) {
 
         <div className="flex-1 overflow-y-auto px-4 py-5">
           <nav className="space-y-2">
-            {navigationItems.map((item) => {
+            {navigationItems
+              .filter((item) => {
+                if (!item.roles) return true
+                return user ? item.roles.includes(user.role) : false
+              })
+              .map((item) => {
               const Icon = item.icon
 
               return (

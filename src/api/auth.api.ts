@@ -1,7 +1,11 @@
 import axios from 'axios'
 import { axiosInstance } from './axiosInstance'
 import { API_BASE_URL, API_ENDPOINTS } from '../utils/constants'
-import type { LoginRequest, LoginResponse } from '../types/auth.types'
+import type {
+  LoginRequest,
+  LoginResponse,
+  RegisterRequest,
+} from '../types/auth.types'
 
 const authApiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -18,10 +22,20 @@ export const login = async (payload: LoginRequest): Promise<LoginResponse> => {
   return data
 }
 
+export const registerAccount = async (
+  payload: RegisterRequest,
+): Promise<LoginResponse> => {
+  const { data } = await authApiClient.post<LoginResponse>(
+    API_ENDPOINTS.auth.register,
+    payload,
+  )
+  return data
+}
+
 export const refreshAccessToken = async (
   refreshToken: string,
-): Promise<{ accessToken: string }> => {
-  const { data } = await authApiClient.post<{ accessToken: string }>(
+): Promise<LoginResponse> => {
+  const { data } = await authApiClient.post<LoginResponse>(
     API_ENDPOINTS.auth.refresh,
     { refreshToken },
   )

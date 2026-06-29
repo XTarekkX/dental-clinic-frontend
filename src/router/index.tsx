@@ -1,5 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { LoginPage } from '../pages/auth/LoginPage'
+import { RegisterPage } from '../pages/auth/RegisterPage'
 import { DashboardPage } from '../pages/dashboard/DashboardPage'
 import { PrivateRoute } from '../components/layout/PrivateRoute'
 import { AppLayout } from '../components/layout/AppLayout'
@@ -11,12 +12,14 @@ import { InvoicesListPage } from '../pages/invoices/InvoicesListPage'
 import { PaymentsPage } from '../pages/payments/PaymentsPage'
 import { ExpensesPage } from '../pages/expenses/ExpensesPage'
 import { ReportsPage } from '../pages/reports/ReportsPage'
+import { ClinicReportsPage } from '../pages/reports/ClinicReportsPage'
 
 export function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path={APP_ROUTES.login} element={<LoginPage />} />
+        <Route path={APP_ROUTES.register} element={<RegisterPage />} />
 
         <Route element={<PrivateRoute />}>
           <Route element={<AppLayout />}>
@@ -34,6 +37,10 @@ export function AppRouter() {
             <Route path={APP_ROUTES.payments} element={<PaymentsPage />} />
             <Route path={APP_ROUTES.expenses} element={<ExpensesPage />} />
             <Route path={APP_ROUTES.reports} element={<ReportsPage />} />
+            <Route
+              path={APP_ROUTES.clinicReports}
+              element={<ClinicReportsPage />}
+            />
           </Route>
         </Route>
 

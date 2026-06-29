@@ -7,9 +7,18 @@ import {
   Wallet,
   BarChart3,
 } from 'lucide-react'
+import type { ComponentType } from 'react'
 import { APP_ROUTES } from '../../utils/constants'
+import type { Role } from '../../types/auth.types'
 
-export const navigationItems = [
+interface NavigationItem {
+  label: string
+  path: string
+  icon: ComponentType<{ className?: string }>
+  roles?: Role[]
+}
+
+export const navigationItems: NavigationItem[] = [
   {
     label: 'Dashboard',
     path: APP_ROUTES.dashboard,
@@ -44,5 +53,11 @@ export const navigationItems = [
     label: 'Reports',
     path: APP_ROUTES.reports,
     icon: BarChart3,
+  },
+  {
+    label: 'Clinic Reports',
+    path: APP_ROUTES.clinicReports,
+    icon: BarChart3,
+    roles: ['ADMIN'],
   },
 ] as const

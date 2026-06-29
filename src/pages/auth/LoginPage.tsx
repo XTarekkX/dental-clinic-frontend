@@ -6,7 +6,7 @@ import toast from 'react-hot-toast'
 import { loginSchema, type LoginSchemaValues } from '../../validation/loginSchema'
 import { login } from '../../api/auth.api'
 import { useAuthStore } from '../../store/authStore'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { APP_ROUTES } from '../../utils/constants'
 import type { ApiErrorResponse } from '../../types/common.types'
 
@@ -24,38 +24,39 @@ export function LoginPage() {
     defaultValues: {
       username: '',
       password: '',
+      rememberMe: false,
     },
   })
 
-const onSubmit = async (values: LoginSchemaValues) => {
-  try {
-    setIsSubmitting(true)
-    const response = await login(values)
-    setAuth(response)
-    toast.success(`Welcome back, Dr. ${response.firstName}`)
-    navigate(APP_ROUTES.dashboard, { replace: true })
-  } catch (error) {
-    console.error('Login error:', error)
+  const onSubmit = async (values: LoginSchemaValues) => {
+    try {
+      setIsSubmitting(true)
+      const response = await login(values)
+      setAuth(response, values.rememberMe)
+      toast.success(`Welcome back, Dr. ${response.firstName}`)
+      navigate(APP_ROUTES.dashboard, { replace: true })
+    } catch (error) {
+      console.error('Login error:', error)
 
-    if (axios.isAxiosError<ApiErrorResponse>(error)) {
-      if (error.response) {
-        const message =
-          error.response.data?.message ||
-          `Request failed with status ${error.response.status}`
+      if (axios.isAxiosError<ApiErrorResponse>(error)) {
+        if (error.response) {
+          const message =
+            error.response.data?.message ||
+            `Request failed with status ${error.response.status}`
 
-        toast.error(message)
-      } else if (error.request) {
-        toast.error('Cannot reach backend server. Check backend and CORS.')
+          toast.error(message)
+        } else if (error.request) {
+          toast.error('Cannot reach backend server. Check backend and CORS.')
+        } else {
+          toast.error('Login request failed before being sent.')
+        }
       } else {
-        toast.error('Login request failed before being sent.')
+        toast.error('Unexpected error occurred during login.')
       }
-    } else {
-      toast.error('Unexpected error occurred during login.')
+    } finally {
+      setIsSubmitting(false)
     }
-  } finally {
-    setIsSubmitting(false)
   }
-}
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-100 px-4">
@@ -114,6 +115,15 @@ const onSubmit = async (values: LoginSchemaValues) => {
             )}
           </div>
 
+          <label className="flex items-center gap-3 text-sm font-medium text-slate-700">
+            <input
+              type="checkbox"
+              {...register('rememberMe')}
+              className="h-4 w-4 rounded border-slate-300 text-teal-700 focus:ring-teal-600"
+            />
+            Remember me
+          </label>
+
           <button
             type="submit"
             disabled={isSubmitting}
@@ -123,11 +133,15 @@ const onSubmit = async (values: LoginSchemaValues) => {
           </button>
         </form>
 
-        <div className="mt-6 rounded-xl bg-slate-50 p-4 text-sm text-slate-600 ring-1 ring-slate-200">
-          <p className="font-medium text-slate-800">Test account</p>
-          <p>Username: drrohan</p>
-          <p>Password: password123</p>
-        </div>
+        <p className="mt-6 text-center text-sm text-slate-600">
+          Need an account?{' '}
+          <Link
+            to={APP_ROUTES.register}
+            className="font-semibold text-teal-700 hover:text-teal-800"
+          >
+            Create account
+          </Link>
+        </p>
       </div>
     </div>
   )

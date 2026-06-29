@@ -5,6 +5,7 @@ import axios, {
 } from 'axios'
 import { API_BASE_URL, API_ENDPOINTS } from '../utils/constants'
 import { useAuthStore } from '../store/authStore'
+import type { LoginResponse } from '../types/auth.types'
 
 interface RetryableRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean
@@ -39,7 +40,7 @@ axiosInstance.interceptors.response.use(
 
     originalRequest._retry = true
 
-    const { refreshToken, clearAuth, setAccessToken } = useAuthStore.getState()
+    const { refreshToken, clearAuth, setTokens } = useAuthStore.getState()
 
     if (!refreshToken) {
       clearAuth()
@@ -47,7 +48,7 @@ axiosInstance.interceptors.response.use(
     }
 
     try {
-      const response = await axios.post<{ accessToken: string }>(
+      const response = await axios.post<LoginResponse>(
         `${API_BASE_URL}${API_ENDPOINTS.auth.refresh}`,
         { refreshToken },
         {
@@ -58,7 +59,7 @@ axiosInstance.interceptors.response.use(
       )
 
       const newAccessToken = response.data.accessToken
-      setAccessToken(newAccessToken)
+      setTokens(newAccessToken, response.data.refreshToken)
 
       originalRequest.headers = {
         ...(originalRequest.headers ?? {}),
