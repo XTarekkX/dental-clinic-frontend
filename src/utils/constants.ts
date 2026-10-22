@@ -4,7 +4,6 @@ export const API_BASE_URL =
 export const API_ENDPOINTS = {
   auth: {
     login: '/api/v1/auth/login',
-    register: '/api/v1/auth/register',
     refresh: '/api/v1/auth/refresh',
     logout: '/api/v1/auth/logout',
     me: '/api/v1/auth/me',
@@ -13,7 +12,6 @@ export const API_ENDPOINTS = {
 
 export const APP_ROUTES = {
   login: '/login',
-  register: '/register',
   dashboard: '/',
   patients: '/patients',
   patientDetail: '/patients/:id',

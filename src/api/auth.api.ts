@@ -4,7 +4,6 @@ import { API_BASE_URL, API_ENDPOINTS } from '../utils/constants'
 import type {
   LoginRequest,
   LoginResponse,
-  RegisterRequest,
 } from '../types/auth.types'
 
 const authApiClient = axios.create({
@@ -17,16 +16,6 @@ const authApiClient = axios.create({
 export const login = async (payload: LoginRequest): Promise<LoginResponse> => {
   const { data } = await authApiClient.post<LoginResponse>(
     API_ENDPOINTS.auth.login,
-    payload,
-  )
-  return data
-}
-
-export const registerAccount = async (
-  payload: RegisterRequest,
-): Promise<LoginResponse> => {
-  const { data } = await authApiClient.post<LoginResponse>(
-    API_ENDPOINTS.auth.register,
     payload,
   )
   return data

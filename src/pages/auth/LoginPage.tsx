@@ -6,7 +6,7 @@ import toast from 'react-hot-toast'
 import { loginSchema, type LoginSchemaValues } from '../../validation/loginSchema'
 import { login } from '../../api/auth.api'
 import { useAuthStore } from '../../store/authStore'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { APP_ROUTES } from '../../utils/constants'
 import type { ApiErrorResponse } from '../../types/common.types'
 
@@ -132,16 +132,6 @@ export function LoginPage() {
             {isSubmitting ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
-
-        <p className="mt-6 text-center text-sm text-slate-600">
-          Need an account?{' '}
-          <Link
-            to={APP_ROUTES.register}
-            className="font-semibold text-teal-700 hover:text-teal-800"
-          >
-            Create account
-          </Link>
-        </p>
       </div>
     </div>
   )
