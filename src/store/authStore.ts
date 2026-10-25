@@ -89,6 +89,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       accessToken: payload.accessToken,
       refreshToken: payload.refreshToken,
       user: {
+        doctorId: payload.doctorId ?? null,
         username: payload.username,
         role: payload.role,
         firstName: payload.firstName,

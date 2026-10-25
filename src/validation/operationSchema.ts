@@ -10,13 +10,11 @@ export const operationSchema = z.object({
   dentalProblem: z
     .string()
     .trim()
-    .min(3, 'Dental problem must be at least 3 characters')
     .max(1000, 'Dental problem is too long'),
 
   treatmentPlan: z
     .string()
     .trim()
-    .min(3, 'Treatment plan must be at least 3 characters')
     .max(2000, 'Treatment plan is too long'),
 
   toothNumber: z

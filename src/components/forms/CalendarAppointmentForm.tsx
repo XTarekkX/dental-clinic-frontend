@@ -5,6 +5,7 @@ import {
   type CalendarAppointmentFormValues,
 } from '../../validation/calendarAppointmentSchema'
 import type { Patient } from '../../types/patient.types'
+import { appointmentReasons } from '../../utils/appointmentReasons'
 
 interface CalendarAppointmentFormProps {
   patients: Patient[]
@@ -128,13 +129,18 @@ export function CalendarAppointmentForm({
           >
             Reason
           </label>
-          <textarea
+          <select
             id="reason"
-            rows={5}
             {...register('reason')}
-            className={`${inputClassName} resize-none`}
-            placeholder="Describe the appointment reason..."
-          />
+            className={inputClassName}
+          >
+            <option value="">Select reason</option>
+            {appointmentReasons.map((reason) => (
+              <option key={reason} value={reason}>
+                {reason}
+              </option>
+            ))}
+          </select>
           {errors.reason && (
             <p className="mt-1 text-xs text-red-600">
               {errors.reason.message}

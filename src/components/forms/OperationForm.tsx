@@ -6,6 +6,8 @@ import {
 } from '../../validation/operationSchema'
 import type { Appointment } from '../../types/appointment.types'
 import type { OperationRequest } from '../../types/operation.types'
+import { formatDate, formatTime } from '../../utils/formatters'
+import { operationTypes } from '../../utils/operationTypes'
 
 interface OperationFormProps {
   patientId: number
@@ -29,6 +31,7 @@ export function OperationForm({
   } = useForm<OperationFormValues>({
     resolver: zodResolver(operationSchema),
     defaultValues: {
+      appointmentId: defaultAppointmentId ? String(defaultAppointmentId) : '',
       operationType: '',
       dentalProblem: '',
       treatmentPlan: '',
@@ -44,7 +47,9 @@ export function OperationForm({
   const submitHandler = (values: OperationFormValues) => {
     onSubmit({
       patientId,
-      appointmentId: defaultAppointmentId,
+      appointmentId:
+        defaultAppointmentId ??
+        (values.appointmentId ? Number(values.appointmentId) : null),
       operationType: values.operationType,
       dentalProblem: values.dentalProblem,
       treatmentPlan: values.treatmentPlan,
@@ -57,36 +62,60 @@ export function OperationForm({
   return (
     <form onSubmit={handleSubmit(submitHandler)}>
       <div className="grid grid-cols-1 gap-5 p-5 sm:grid-cols-2 sm:p-6">
-        {defaultAppointmentId === null && appointments.length > 0 && (
+        {defaultAppointmentId === null && (
           <div className="sm:col-span-2">
             <label
-              htmlFor="appointmentInfo"
+              htmlFor="appointmentId"
               className="mb-2 block text-sm font-medium text-slate-700"
             >
-              Available Appointments
+              Related Appointment
             </label>
-            <div
-              id="appointmentInfo"
-              className="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-slate-700"
+            <select
+              id="appointmentId"
+              {...register('appointmentId')}
+              className={inputClassName}
             >
-              This operation will be created from the patient page. Appointment linking can be added in the next step from inside appointment workflow.
-            </div>
+              <option value="">No linked appointment</option>
+              {appointments.map((appointment) => (
+                <option key={appointment.id} value={appointment.id}>
+                  #{appointment.id} - {formatDate(appointment.scheduledAt)} at{' '}
+                  {formatTime(appointment.scheduledAt)} - {appointment.reason} -{' '}
+                  {appointment.status}
+                </option>
+              ))}
+            </select>
+            {appointments.length === 0 && (
+              <p className="mt-1 text-xs text-slate-500">
+                This patient has no appointments yet.
+              </p>
+            )}
+            {errors.appointmentId && (
+              <p className="mt-1 text-xs text-red-600">
+                {errors.appointmentId.message}
+              </p>
+            )}
           </div>
         )}
 
-        <div>
+        <div className="sm:col-span-2">
           <label
             htmlFor="operationType"
             className="mb-2 block text-sm font-medium text-slate-700"
           >
             Operation Type
           </label>
-          <input
+          <select
             id="operationType"
             {...register('operationType')}
             className={inputClassName}
-            placeholder="Root Canal, Extraction, Implant..."
-          />
+          >
+            <option value="">Select operation type</option>
+            {operationTypes.map((operationType, index) => (
+              <option key={`${index}-${operationType}`} value={operationType}>
+                {operationType}
+              </option>
+            ))}
+          </select>
           {errors.operationType && (
             <p className="mt-1 text-xs text-red-600">
               {errors.operationType.message}

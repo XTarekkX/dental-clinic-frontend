@@ -58,7 +58,7 @@ export function PatientOperationsTab({
                 </div>
 
                 <p className="mt-2 text-sm text-slate-600">
-                  {operation.dentalProblem}
+                  {operation.dentalProblem || 'No dental problem recorded'}
                 </p>
 
                 <div className="mt-3 flex flex-col gap-2 text-sm text-slate-500">
@@ -87,7 +87,9 @@ export function PatientOperationsTab({
                 <Stethoscope className="h-4 w-4 text-emerald-600" />
                 Treatment Plan
               </div>
-              <p className="leading-7">{operation.treatmentPlan}</p>
+              <p className="leading-7">
+                {operation.treatmentPlan || 'No treatment plan recorded'}
+              </p>
               {operation.notes && (
                 <>
                   <div className="mb-2 mt-4 font-semibold text-slate-900">

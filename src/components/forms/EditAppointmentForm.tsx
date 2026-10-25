@@ -5,6 +5,7 @@ import {
   type AppointmentFormValues,
 } from '../../validation/appointmentSchema'
 import type { Appointment } from '../../types/appointment.types'
+import { appointmentReasons } from '../../utils/appointmentReasons'
 
 interface EditAppointmentFormProps {
   appointment: Appointment
@@ -43,7 +44,11 @@ export function EditAppointmentForm({
     defaultValues: {
       scheduledAt: toDateTimeLocal(appointment.scheduledAt),
       durationMinutes: appointment.durationMinutes,
-      reason: appointment.reason,
+      reason: appointmentReasons.includes(
+        appointment.reason as (typeof appointmentReasons)[number],
+      )
+        ? appointment.reason
+        : '',
     },
   })
 
@@ -109,13 +114,18 @@ export function EditAppointmentForm({
           >
             Reason
           </label>
-          <textarea
+          <select
             id="reason"
-            rows={5}
             {...register('reason')}
-            className={`${inputClassName} resize-none`}
-            placeholder="Describe the appointment reason..."
-          />
+            className={inputClassName}
+          >
+            <option value="">Select reason</option>
+            {appointmentReasons.map((reason) => (
+              <option key={reason} value={reason}>
+                {reason}
+              </option>
+            ))}
+          </select>
           {errors.reason && (
             <p className="mt-1 text-xs text-red-600">
               {errors.reason.message}

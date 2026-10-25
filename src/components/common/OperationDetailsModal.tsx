@@ -26,6 +26,8 @@ import { EditOperationForm } from '../forms/EditOperationForm'
 import { useUpdateOperation } from '../../hooks/useUpdateOperation'
 import { useUpdateOperationStatus } from '../../hooks/useUpdateOperationStatus'
 import { useDeleteOperation } from '../../hooks/useDeleteOperation'
+import { useAuthStore } from '../../store/authStore'
+import { canManageDoctorOwnedRecord } from '../../utils/ownership'
 
 interface OperationDetailsModalProps {
   isOpen: boolean
@@ -50,16 +52,19 @@ export function OperationDetailsModal({
 }: OperationDetailsModalProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
+  const user = useAuthStore((state) => state.user)
+  const canManageOperation = canManageDoctorOwnedRecord(user, operation)
+  const operationAppointmentId = operation?.appointmentId ?? null
 
   const linkedAppointment = useMemo(() => {
-    if (!operation?.appointmentId) return null
+    if (!operationAppointmentId) return null
 
     return (
       appointments.find(
-        (appointment) => appointment.id === operation.appointmentId,
+        (appointment) => appointment.id === operationAppointmentId,
       ) ?? null
     )
-  }, [appointments, operation?.appointmentId])
+  }, [appointments, operationAppointmentId])
 
   const nextStatuses = operation
     ? getNextOperationStatuses(operation.status)
@@ -78,15 +83,15 @@ export function OperationDetailsModal({
     operationId: operation?.id,
   })
 
-const deleteOperationMutation = useDeleteOperation({
-  patientId: operation?.patientId,
-  operationId: operation?.id,
-  onSuccess: () => {
-    setIsDeleteOpen(false)
-    setIsEditing(false)
-    onClose()
-  },
-})
+  const deleteOperationMutation = useDeleteOperation({
+    patientId: operation?.patientId,
+    operationId: operation?.id,
+    onSuccess: () => {
+      setIsDeleteOpen(false)
+      setIsEditing(false)
+      onClose()
+    },
+  })
 
   const handleClose = () => {
     if (
@@ -124,7 +129,7 @@ const deleteOperationMutation = useDeleteOperation({
               </p>
             </div>
           </div>
-        ) : isEditing ? (
+        ) : isEditing && canManageOperation ? (
           <EditOperationForm
             operation={operation}
             appointments={appointments}
@@ -150,7 +155,7 @@ const deleteOperationMutation = useDeleteOperation({
                       {operation.operationType}
                     </h3>
                     <p className="mt-1 text-sm leading-6 text-slate-600">
-                      {operation.dentalProblem}
+                      {operation.dentalProblem || 'No dental problem recorded'}
                     </p>
                   </div>
                 </div>
@@ -231,7 +236,7 @@ const deleteOperationMutation = useDeleteOperation({
                 Treatment Plan
               </div>
               <p className="text-sm leading-7 text-slate-700">
-                {operation.treatmentPlan}
+                {operation.treatmentPlan || 'No treatment plan recorded'}
               </p>
 
               {operation.notes && (
@@ -246,63 +251,67 @@ const deleteOperationMutation = useDeleteOperation({
               )}
             </section>
 
-            <section className="rounded-3xl border border-emerald-100 bg-slate-50 p-5">
-              <h4 className="text-sm font-semibold text-slate-900">
-                Status Actions
-              </h4>
+            {canManageOperation && (
+              <>
+                <section className="rounded-3xl border border-emerald-100 bg-slate-50 p-5">
+                  <h4 className="text-sm font-semibold text-slate-900">
+                    Status Actions
+                  </h4>
 
-              {nextStatuses.length === 0 ? (
-                <p className="mt-2 text-sm text-slate-500">
-                  This operation is completed. No further status actions are
-                  available.
-                </p>
-              ) : (
-                <div className="mt-4 flex flex-wrap gap-3">
-                  {nextStatuses.map((status) => (
-                    <button
-                      key={status}
-                      type="button"
-                      disabled={updateStatusMutation.isPending}
-                      onClick={() => {
-                        updateStatusMutation.mutate({
-                          operationId: operation.id,
-                          status,
-                        })
-                      }}
-                      className="inline-flex items-center justify-center rounded-2xl bg-white px-4 py-2.5 text-sm font-semibold text-emerald-700 shadow-sm ring-1 ring-emerald-100 transition hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-70"
-                    >
-                      Mark as {operationStatusLabels[status]}
-                    </button>
-                  ))}
+                  {nextStatuses.length === 0 ? (
+                    <p className="mt-2 text-sm text-slate-500">
+                      This operation is completed. No further status actions are
+                      available.
+                    </p>
+                  ) : (
+                    <div className="mt-4 flex flex-wrap gap-3">
+                      {nextStatuses.map((status) => (
+                        <button
+                          key={status}
+                          type="button"
+                          disabled={updateStatusMutation.isPending}
+                          onClick={() => {
+                            updateStatusMutation.mutate({
+                              operationId: operation.id,
+                              status,
+                            })
+                          }}
+                          className="inline-flex items-center justify-center rounded-2xl bg-white px-4 py-2.5 text-sm font-semibold text-emerald-700 shadow-sm ring-1 ring-emerald-100 transition hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-70"
+                        >
+                          Mark as {operationStatusLabels[status]}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </section>
+
+                <div className="flex flex-col gap-3 border-t border-emerald-100 pt-5 sm:flex-row sm:justify-end">
+                  <button
+                    type="button"
+                    onClick={() => setIsDeleteOpen(true)}
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-red-50 px-5 py-3 text-sm font-semibold text-red-700 ring-1 ring-red-100 transition hover:bg-red-100"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Delete
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setIsEditing(true)}
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-emerald-500 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:from-emerald-700 hover:to-emerald-600"
+                  >
+                    <Edit3 className="h-4 w-4" />
+                    Edit Operation
+                  </button>
                 </div>
-              )}
-            </section>
-
-            <div className="flex flex-col gap-3 border-t border-emerald-100 pt-5 sm:flex-row sm:justify-end">
-              <button
-                type="button"
-                onClick={() => setIsDeleteOpen(true)}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-red-50 px-5 py-3 text-sm font-semibold text-red-700 ring-1 ring-red-100 transition hover:bg-red-100"
-              >
-                <Trash2 className="h-4 w-4" />
-                Delete
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setIsEditing(true)}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-emerald-500 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:from-emerald-700 hover:to-emerald-600"
-              >
-                <Edit3 className="h-4 w-4" />
-                Edit Operation
-              </button>
-            </div>
+              </>
+            )}
           </div>
         )}
       </Modal>
 
       <ConfirmDialog
-        isOpen={isDeleteOpen}
+        isOpen={canManageOperation && isDeleteOpen}
         title="Delete Operation"
         description="This action will permanently remove this operation. If the backend rejects the action, an error toast will appear."
         confirmLabel="Delete Operation"
@@ -313,7 +322,7 @@ const deleteOperationMutation = useDeleteOperation({
           }
         }}
         onConfirm={() => {
-          if (!operation) return
+          if (!operation || !canManageOperation) return
           deleteOperationMutation.mutate(operation.id)
         }}
       />

@@ -28,6 +28,8 @@ import {
 } from '../../utils/appointmentOperationRules.ts'
 import { useAppointmentNotes } from '../../hooks/useAppointmentNotes'
 import { useAppointmentOperations } from '../../hooks/useAppointmentOperations.ts'
+import { useAuthStore } from '../../store/authStore'
+import { canManageDoctorOwnedRecord } from '../../utils/ownership'
 import type { Appointment } from '../../types/appointment.types'
 
 interface AppointmentDetailsModalProps {
@@ -76,6 +78,8 @@ export function AppointmentDetailsModal({
   onChangeStatus,
 }: AppointmentDetailsModalProps) {
   const [activeTab, setActiveTab] = useState<AppointmentModalTab>('details')
+  const user = useAuthStore((state) => state.user)
+  const canManageAppointment = canManageDoctorOwnedRecord(user, appointment)
 
   const appointmentNotesQuery = useAppointmentNotes(
     appointment?.patientId ?? null,
@@ -118,11 +122,11 @@ export function AppointmentDetailsModal({
     : []
 
   const canAddNote = appointment
-    ? canCreateAppointmentNote(appointment.status)
+    ? canManageAppointment && canCreateAppointmentNote(appointment.status)
     : false
 
   const canAddOperation = appointment
-    ? canCreateAppointmentOperation(appointment.status)
+    ? canManageAppointment && canCreateAppointmentOperation(appointment.status)
     : false
 
   return (
@@ -147,7 +151,7 @@ export function AppointmentDetailsModal({
 
             <div className="flex flex-wrap items-center gap-3">
               <StatusBadge status={appointment.status} />
-              {onEdit && (
+              {canManageAppointment && onEdit && (
                 <button
                   type="button"
                   onClick={onEdit}
@@ -206,7 +210,7 @@ export function AppointmentDetailsModal({
                 />
               </div>
 
-              {nextStatuses.length > 0 && (
+              {canManageAppointment && nextStatuses.length > 0 && (
                 <div>
                   <h4 className="mb-3 text-sm font-semibold uppercase tracking-[0.14em] text-slate-500">
                     Next Actions
@@ -227,7 +231,7 @@ export function AppointmentDetailsModal({
                 </div>
               )}
 
-              {nextStatuses.length === 0 && (
+              {canManageAppointment && nextStatuses.length === 0 && (
                 <div className="rounded-2xl bg-slate-50 p-4 text-sm text-slate-600">
                   This appointment is in a terminal state and no further status transitions are available.
                 </div>

@@ -108,7 +108,3 @@ export const getPatientPayments = async (
   )
   return data
 }
-
-export const deletePayment = async (paymentId: number): Promise<void> => {
-  await axiosInstance.delete(`/api/v1/payments/${paymentId}`)
-}

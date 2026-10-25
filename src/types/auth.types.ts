@@ -9,6 +9,7 @@ export interface LoginRequest {
 export interface LoginResponse {
   accessToken: string
   refreshToken: string
+  doctorId?: number | null
   username: string
   role: Role
   firstName: string
@@ -28,6 +29,7 @@ export interface RegisterRequest {
 }
 
 export interface CurrentUser {
+  doctorId?: number | null
   username: string
   role: Role
   firstName: string
