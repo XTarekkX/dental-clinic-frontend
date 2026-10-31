@@ -147,14 +147,14 @@ export function PatientForm({
 
         <div>
           <label htmlFor="email" className={labelClassName}>
-            Email
+            Email (optional)
           </label>
           <input
             id="email"
             type="email"
             {...register('email')}
             className={inputClassName}
-            placeholder="Enter email"
+            placeholder="Enter email (optional)"
           />
           {errorText(errors.email?.message)}
         </div>

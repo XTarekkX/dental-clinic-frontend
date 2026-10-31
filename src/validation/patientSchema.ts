@@ -26,8 +26,11 @@ export const patientSchema = z.object({
   email: z
     .string()
     .trim()
-    .email('Please enter a valid email address')
-    .max(150, 'Email is too long'),
+    .max(150, 'Email is too long')
+    .refine(
+      (value) => value === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
+      'Please enter a valid email address',
+    ),
 
   address: z
     .string()
